@@ -16,17 +16,22 @@ ID INT PRIMARY KEY IDENTITY,
 ALTER TABLE Minions
 ADD TownID INT FOREIGN KEY REFERENCES Towns(Id)
 
-SET IDENTITY_INSERT Towns ON 
+--SET IDENTITY_INSERT Minions ON
+SET IDENTITY_INSERT Towns OFF 
 
 Insert INTO Towns(Id, Name)
 VALUES (1,'Sofia'),
 (2, 'Plovdiv'),
 (3, 'Varna')
 
-SET IDENTITY_INSERT Minions ON 
+SET IDENTITY_INSERT Minions ON
 
-Insert INTO Towns(Id, Name, Age, TownId)
+Insert INTO Minions(Id, Name, Age, TownId)
 Values (1, 'kevin', 22, 1),
 		(2, 'Bob', 15, 3),
 		(3, 'Steward', NULL, 2)
+
+TRUNCATE TABLE MINIONS
+
+DROP TABLE Minions, Towns
 

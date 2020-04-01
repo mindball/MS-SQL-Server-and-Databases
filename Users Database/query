@@ -1,0 +1,28 @@
+CREATE DATABASE USERS
+
+USE USERS
+
+CREATE TABLE USERS(
+Id BIGINT PRIMARY KEY IDENTITY,
+UserName CHAR(30) UNIQUE NOT NULL,
+Password CHAR(26) NOT NULL Constraint Password CHECK(DATALENGTH([Password]) > 4),
+ProfilePicture VARBINARY(900),
+LastLoginTime DATETIME NOT NULL,
+IsDeleted BIT
+)
+
+SET IDENTITY_INSERT Users ON
+
+Insert INTO USERS(Id, Username, [Password], LastLoginTime, IsDeleted)
+Values(1, 'bob.ram', '123456', 2019-12-31, 1),
+		(2, 'aram.rebr', '1234567', 01/02/2019, 0)
+
+
+--Unique username error
+Insert INTO USERS(Id, Username, [Password], LastLoginTime, IsDeleted)
+Values(3, 'bob.ram', '1234', 2019-12-31, 1)
+
+--constraint conflict password len must be bigger than 4 symbol
+Insert INTO USERS(Id, Username, [Password], LastLoginTime, IsDeleted)
+Values(3, 'len.password', '12345', 2019-12-31, 1)
+		
