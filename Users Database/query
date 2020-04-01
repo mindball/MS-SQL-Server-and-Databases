@@ -20,9 +20,9 @@ Values(1, 'bob.ram', '123456', 2019-12-31, 1),
 
 --Unique username error
 Insert INTO USERS(Id, Username, [Password], LastLoginTime, IsDeleted)
-Values(3, 'bob.ram', '1234', 2019-12-31, 1)
+Values(3, 'bob.ram', '12345', 2019-12-31, 1)
 
 --constraint conflict password len must be bigger than 4 symbol
 Insert INTO USERS(Id, Username, [Password], LastLoginTime, IsDeleted)
-Values(3, 'len.password', '12345', 2019-12-31, 1)
+Values(3, 'len.password', '1234', 2019-12-31, 1)
 		
