@@ -1,0 +1,62 @@
+--Aliases AS with Concatenate
+
+SELECT
+  FirstName + ' ' + LastName AS 'Full Name',
+  JobTitle                   AS 'Job Title',
+  Salary
+FROM Employees
+
+SELECT DISTINCT JobTitle FROM Employees
+
+SELECT DISTINCT JobTitle FROM Employees
+WHERE DepartmentId = 1
+
+--Много често използвано IN/NOT IN
+Select FirstName, LastName, ManagerID
+From Employees
+WHERE ManageID IN(109, 3, 16)
+
+SELECT DISTINCT  JobTitle
+FROM Employees
+Where DepartmentId = 1
+ORDER BY JobTitle
+
+GO
+
+CREATE VIEW v_EmployeesOfDepartmen1 AS
+  SELECT
+  FirstName + ' ' + LastName AS 'Full Name',
+  JobTitle                   AS 'Job Title',
+  Salary
+FROM Employees
+WHERE DepartmentId = 1
+
+--Task
+CREATE VIEW v_HighestSalary AS
+SELECT TOP(1)*
+FROM Employees
+ORDER BY Salary DESC
+
+SELECT * FROM v_HighestSalary
+
+--INSERT
+INSERT INTO Towns
+    VALUES ('Stara Zagora')
+
+--Inserting rows into existing table:
+INSERT INTO Projects (Name, StartDate)
+	SELECT Name + ' Restructuring', GETDATE()
+	FROM Departments
+
+--Using existing records to create a new table:
+SELECT CustomerID, FirstName, Email, Phone
+	INTO CustomerContacts
+	FROM Customers
+
+
+--Sequences
+CREATE SEQUENCE seq_Customers_CustomerID
+  AS INT
+  START WITH 1
+  INCREMENT BY 1
+SELECT NEXT VALUE FOR seq_Customers_CustomerID
