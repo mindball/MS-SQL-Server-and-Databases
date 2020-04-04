@@ -38,6 +38,58 @@ SELECT FirstName, LastName
 FROM dbo.Employees
 WHERE DepartmentId != 4
 
+SELECT *
+FROM dbo.Employees
+ORDER BY
+  Salary DESC,
+  FirstName ASC,
+  LastName DESC,
+  MiddleName ASC
+
+CREATE  VIEW V_EmployeesSalaries AS
+ SELECT FirstName, LastName, Salary
+ FROM dbo.Employees
+
+CREATE  VIEW V_EmployeeNameJobTitle AS
+  Select
+    FirstName + ' ' + ISNULL(MiddleName, '') + ' ' + LastName AS [Full Name]
+    ,JobTitle AS [Job Title]
+FROM dbo.Employees
+
+SELECT DISTINCT JobTitle FROM dbo.Employees
+
+SELECT TOP(10) *
+  FROM Projects
+ORDER BY StartDate, Name
+
+SELECT TOP(7) FirstName, LastName, HireDate
+FROM dbo.Employees
+ORDER BY HireDate DESC
+
+UPDATE dbo.Employees
+SET Salary *= 1.12
+WHERE DepartmentId IN (1, 2, 4,11)
+
+SELECT Salary
+From dbo.Employees
+
+SELECT PeakName
+FROM Peaks
+ORDER BY PeakName
+
+SELECT TOP(30) CountryName, Population
+From Countries
+WHERE ContinentCode = 'EU'
+ORDER BY Population DESC, CountryName ASC
+
+SELECT CountryName, CountryCode,
+CASE
+  WHEN CurrencyCode <> 'EUR' THEN 'Not Euro'
+  ELSE 'Euro'
+END AS Currency
+From Countries
+ORDER BY CountryName
+
 
 
 
