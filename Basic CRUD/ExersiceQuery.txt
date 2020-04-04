@@ -1,0 +1,43 @@
+SELECT * FROM dbo.Departments
+
+SELECT Name FROM dbo.Departments
+
+SELECT FirstName, LastName, Salary FROM dbo.Employees
+
+SELECT FirstName, MiddleName, LastName FROM dbo.Employees
+
+SELECT FirstName + '.' + LastName + '@softuni.bg' AS 'Full Email Address'
+FROM dbo.Employees
+
+SELECT DISTINCT Salary FROM dbo.Employees
+
+SELECT * FROM dbo.Employees
+Where JobTitle = 'Sales Representative'
+
+SELECT FirstName, LastName, JobTitle
+FROM dbo.Employees
+WHERE Salary >= 20000 AND Salary <= 30000
+
+Select FirstName + ' ' + MiddleName + ' ' + LastName AS [Full Name]
+From Employees
+WHERE Salary IN(25000, 14000, 12500, 23600)
+
+SELECT FirstName, LastName FROM dbo.Employees
+Where ManagerID IS NULL
+
+SELECT FirstName, LastName, Salary
+FROM dbo.Employees
+WHERE Salary > 50000
+ORDER BY Salary DESC
+
+SELECT TOP(5) FirstName, LastName
+FROM dbo.Employees
+ORDER BY Salary Desc
+
+SELECT FirstName, LastName
+FROM dbo.Employees
+WHERE DepartmentId != 4
+
+
+
+
