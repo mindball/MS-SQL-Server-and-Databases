@@ -1,0 +1,27 @@
+SELECT CONCAT_WS(' ', FirstName, LastName)
+AS [Full Name]
+FROM Employee
+
+SELECT CONCAT_WS('.', SUBSTRING((FirstName,1,1), SUBSTRING(Lastname, 1, 1), '')) AS
+FROM Employee
+
+SELECT REPLACE('My bad text', 'bad', 'awesome')
+
+SELECT CONCAT(LTRIM('     Pesho    '), '...') AS PS
+
+SELECT CONCAT(RTRIM('     Pesho    '), '...') AS PS
+
+SELECT CONCAT(SUBSTRING(PaymentNumber, 1, 5), 6)
+  FROM Customers
+
+SELECT
+  ID
+  ,FirstName
+  ,LastName
+  ,CONCAT(SUBSTRING(PaymentNumber1, 1, 5),
+          REPLICATE('*', LEN(PaymentNumber1) - 5))
+FROM  Customer
+
+SELECT CHARINDEX('IS', 'This are unique')
+
+SELECT STUFF('This are unique', 6, 3, 'is')
