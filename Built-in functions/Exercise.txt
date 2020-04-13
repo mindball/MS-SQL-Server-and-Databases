@@ -1,0 +1,42 @@
+Select FirstName, LastName
+From dbo.Employees
+Where FirstName Like 'SA%'
+
+Select FirstName, LastName
+From dbo.Employees
+Where LastName Like '%EI%'
+
+Select FirstName
+From dbo.Employees
+Where
+  DepartmentId IN(3,10)
+AND
+  (DATEPART(YEAR, HireDate) BETWEEN 1995 AND 2005)
+
+Select FirstName, LastName
+From dbo.Employees
+Where JobTitle Not Like '%engineer%'
+
+Select Name
+From Towns
+Where LEN(Name) >= 5 and LEN(Name) <= 6
+ORDER BY Name
+
+Select *
+From Towns
+Where Name Like '[MKBE]%'
+ORDER BY Name
+
+Select *
+From Towns
+Where Name Not Like '[RBD]%'
+ORDER BY Name
+
+CREATE VIEW V_EmployeesHiredAfter2000 AS
+  SELECT FirstName, LastName
+  From dbo.Employees
+Where DATEPART(YEAR, HireDate) > 2000
+
+Select FirstName, LastName
+From dbo.Employees
+WHERE LEN(LastName) = 5
