@@ -92,3 +92,18 @@ Select TOP(50) Name, FORMAT(Start, 'yyyy-MM-dd') As Start
 From Games
 Where DATEPART(YEAR, Start) BETWEEN 2011 AND 2012
 ORDER BY Start
+
+SELECT
+  Username,
+  SUBSTRING (
+		   [Email],
+		   CHARINDEX( '@', [Email] ) + 1,
+		   LEN([Email])
+		 ) AS [Email Provider]
+  From Users
+ORDER BY [Email Provider], Username
+
+SELECT Username, IpAddress AS 'Ip Address'
+From Users
+Where IpAddress Like '___.1_%._%.___'
+ORDER BY Username
