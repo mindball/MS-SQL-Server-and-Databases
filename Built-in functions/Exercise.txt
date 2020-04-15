@@ -40,3 +40,55 @@ Where DATEPART(YEAR, HireDate) > 2000
 Select FirstName, LastName
 From dbo.Employees
 WHERE LEN(LastName) = 5
+
+
+Select EmployeeID, FirstName, LastName, Salary,
+  DENSE_RANK() Over (PARTITION BY Salary ORDER BY EmployeeID) AS Rank
+From dbo.Employees
+Where Salary BETWEEN 10000 AND 50000
+ORDER BY Salary DESC
+
+Select *
+  From
+(
+    Select
+      EmployeeID,
+      FirstName,
+      LastName,
+      Salary,
+      DENSE_RANK()
+      Over ( PARTITION BY Salary
+        ORDER BY EmployeeID ) AS Rank
+    From dbo.Employees
+    Where (Salary BETWEEN 10000 AND 50000)
+) as Test
+Where  Test.Rank = 2
+ORDER BY Test.Salary DESC
+
+Use Geography
+
+SELECT CountryName as 'Country Name', IsoCode as 'Iso Code'
+  From Countries
+Where CountryName Like '%a%a%a%'
+ORDER BY [Iso Code]
+
+
+
+Select
+  *,
+  LOWER(CONCAT(Left(MixConcat.PeakName, LEN(MixConcat.PeakName) - 1), MixConcat.RiverName)) As Mix
+FROM (
+       Select
+         PeakName,
+         RiverName
+       From Peaks, Rivers
+     ) As MixConcat
+Where Right(MixConcat.PeakName, 1) = LEFT(MixConcat.RiverName, 1)
+Order By Mix
+
+Use Diablo
+
+Select TOP(50) Name, FORMAT(Start, 'yyyy-MM-dd') As Start
+From Games
+Where DATEPART(YEAR, Start) BETWEEN 2011 AND 2012
+ORDER BY Start
