@@ -107,3 +107,18 @@ SELECT Username, IpAddress AS 'Ip Address'
 From Users
 Where IpAddress Like '___.1_%._%.___'
 ORDER BY Username
+
+Select Name,
+  Case
+  When DATEPART(HOUR, Start) >= 0 And DATEPART(HOUR, Start) < 12 Then 'Morning'
+  When DATEPART(HOUR, Start) >= 12 And DATEPART(HOUR, Start) < 18 Then 'Afternoon'
+  When DATEPART(HOUR, Start) >= 18 And DATEPART(HOUR, Start) < 24 Then 'Evening'
+    END AS 'Part of the Day',
+  Case
+  When Duration <= 3 Then 'Extra Short'
+    When Duration BETWEEN 4 and 6 Then 'Short'
+    When Duration > 6 Then 'Long'
+    When Duration IS Null Then 'Extra Long'
+    END AS 'Duration'
+From Games
+ORDER BY Name, 'Duration', 'Part of the Day'
