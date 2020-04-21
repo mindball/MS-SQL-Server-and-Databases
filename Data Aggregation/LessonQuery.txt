@@ -1,0 +1,5 @@
+Use SoftUni
+
+Select DepartmentId, Sum(Salary) AS 'Sum Of Department'
+  From Employees
+GROUP BY DepartmentId
