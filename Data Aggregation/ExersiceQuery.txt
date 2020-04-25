@@ -1,0 +1,101 @@
+SELECT COUNT(Id) AS [Count]
+FROM WizzardDeposits
+
+Select Max(MagicWandSize) as [LongestMagicWand]
+FROM WizzardDeposits
+
+Select DepositGroup, Max(MagicWandSize) as [LongestMagicWand]
+FROM WizzardDeposits
+GROUP BY DepositGroup
+
+Select TOP(2) DepositGroup
+FROM WizzardDeposits
+GROUP BY DepositGroup
+ORDER BY AVG(MagicWandSize)
+
+SELECT DepositGroup
+FROM WizzardDeposits
+GROUP BY DepositGroup
+HAVING AVG(MagicWandSize) =
+(
+    SELECT MIN(WizAverageWandSize.averageWandSize)
+    FROM
+    (
+        SELECT AVG(MagicWandSize) AS averageWandSize
+        FROM WizzardDeposits
+        GROUP BY DepositGroup
+    ) AS WizAverageWandSize
+);
+
+SELECT DepositGroup, SUM(DepositAmount)
+FROM WizzardDeposits
+GROUP BY DepositGroup
+
+
+SELECT DepositGroup, SUM(DepositAmount) AS [TotalSum]
+FROM WizzardDeposits
+  WHERE MagicWandCreator = 'Ollivander family'
+GROUP BY DepositGroup
+
+SELECT DepositGroup, SUM(DepositAmount) AS [TotalSum]
+FROM WizzardDeposits
+  WHERE MagicWandCreator = 'Ollivander family'
+GROUP BY DepositGroup
+  HAVING SUM(DepositAmount) < 150000
+ORDER BY TotalSum DESC
+
+SELECT DepositGroup
+  , MagicWandCreator
+  , MIN(DepositCharge)
+FROM WizzardDeposits
+GROUP BY DepositGroup, MagicWandCreator
+ORDER BY MagicWandCreator, DepositGroup
+
+/*
+CASE
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
+    WHEN conditionN THEN resultN
+    ELSE result
+END;
+ */
+SELECT Age
+  , MagicWandCreator
+  , MIN(DepositCharge)
+FROM WizzardDeposits
+
+SELECT *, Count(*) as [WizardCount]
+From(
+    select
+    case
+    when Age between 0 and 10 then '[0-10]'
+    when Age between 11 and 20 then '[11-20]'
+    when Age between 21 and 30 then '[21-30]'
+    when Age between 31 and 40 then '[31-40]'
+    when Age between 41 and 50 then '[41-50]'
+    when Age between 51 and 60 then '[51-60]'
+    when Age > 60 then '[61+]'
+    end as [AgeGroup]
+    from WizzardDeposits
+) as [AgeRange]
+GROUP BY AgeRange.AgeGroup
+
+SELECT FirstLetterTable.FirstLetter
+FROM
+  (
+    SELECT DISTINCT LEFT(FirstName, 1) AS FirstLetter
+    FROM WizzardDeposits
+    WHERE DepositGroup = 'Troll Chest'
+  ) AS FirstLetterTable
+GROUP BY FirstLetter
+ORDER BY FirstLetter
+
+--Second way
+SELECT LEFT(FirstName, 1) AS FirstLetter
+FROM WizzardDeposits
+WHERE DepositGroup = 'Troll Chest'
+GROUP BY LEFT(FirstName, 1)
+ORDER BY FirstLetter
+
+
+
