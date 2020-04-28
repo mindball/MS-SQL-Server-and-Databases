@@ -169,4 +169,19 @@ HAVING MAX(Salary) NOT BETWEEN 30000 AND 70000
 SELECT COUNT(1) - COUNT(ManagerID)
 FROM Employees
 
+SELECT DISTINCT x.DepartmentID, x.Salary
+FROM
+  (
+  SELECT DepartmentID, Salary, DENSE_RANK() OVER (PARTITION BY DepartmentID ORDER BY Salary DESC) AS Salaries FROM Employees)X
+WHERE X.Salaries=3
+
+SELECT TOP 10 FirstName, LastName, DepartmentID
+From Employees A
+WHERE Salary > (
+  SELECT AVG(Salary)
+  FROM Employees B
+  WHERE B.DepartmentID = A.DepartmentID
+)
+ORDER BY  DepartmentID
+
 
