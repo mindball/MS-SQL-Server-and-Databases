@@ -349,15 +349,17 @@ CREATE TABLE Agenda
              CONSTRAINT FK_Agenda_Subjects FOREIGN KEY(SubjectID) REFERENCES Subjects(SubjectID)
 ); 
 
+---------------------------------------------------------------------
+--Problem 9.*Peaks in Rila 
 
---Varianr 1
+--Variant 1
 SELECT m.MountainRange , p.PeakName, p.Elevation
 FROM Mountains AS m
 JOIN Peaks p on m.Id = p.MountainId
 WHERE m.MountainRange = 'Rila'
 ORDER BY p.Elevation DESC
 
---Varianr 2
+--Variant 2
 SELECT MountainRange,
        PeakName,
        Elevation

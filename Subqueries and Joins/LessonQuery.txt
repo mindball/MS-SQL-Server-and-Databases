@@ -1,0 +1,41 @@
+INSERT INTO Orders (OrderName, OrderNo) VALUES ('My first order', 1)
+INSERT INTO Orders (OrderName, OrderNo) VALUES ('My second order', 2)
+INSERT INTO Orders (OrderName, OrderNo) VALUES ('My NULL order', NULL)
+INSERT INTO Orders (OrderName, OrderNo) VALUES (Null, 3)
+
+INSERT INTO Items (ItemName, OrderName, OrderNumber) VALUES
+('Mouse', 'My First Order', 1)
+INSERT INTO Items (ItemName, OrderName, OrderNumber) VALUES
+('Keyboard', 'My Non Existing  Order', 43)
+INSERT INTO Items (ItemName, OrderName, OrderNumber) VALUES
+('Monitor', NULL, 2)
+INSERT INTO Items (ItemName, OrderName, OrderNumber) VALUES
+('Computer', 'My First Order', 1)
+
+--Inner Join
+SELECT * FROM Orders
+SELECT * FROM Items
+
+SELECT * FROM Orders AS o
+JOIN Items AS i ON o.OrderNo = i.OrderNumber
+
+--Left Join
+SELECT * FROM Orders
+SELECT * FROM Items
+
+SELECT * FROM Orders AS o
+LEFT JOIN Items AS i ON o.OrderNo = i.OrderNumber
+
+--Right Join
+SELECT * FROM Orders
+SELECT * FROM Items
+
+SELECT * FROM Orders AS o
+RIGHT JOIN Items AS i ON o.OrderNo = i.OrderNumber
+
+--Full join
+SELECT * FROM Orders
+SELECT * FROM Items
+
+SELECT * FROM Orders AS o
+FULL JOIN Items AS i ON o.OrderNo = i.OrderNumber
