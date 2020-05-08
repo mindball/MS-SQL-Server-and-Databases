@@ -132,3 +132,4 @@ SELECT TOP 1 AVG(e.Salary) AS AverageSalary
 	FROM Employees AS e
 	GROUP BY e.DepartmentID
 	ORDER BY AverageSalary
+
