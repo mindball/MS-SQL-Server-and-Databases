@@ -39,3 +39,96 @@ SELECT * FROM Items
 
 SELECT * FROM Orders AS o
 FULL JOIN Items AS i ON o.OrderNo = i.OrderNumber
+
+--Display address information of all employees in "SoftUni" database.
+SELECT TOP 50 FirstName, LastName, t.Name AS [Town], a.AddressText 
+FROM Employees AS e
+JOIN Addresses AS a ON e.AddressID = a.AddressID
+JOIN Towns t ON a.TownID = t.TownID
+ORDER BY e.FirstName, e.LastName
+
+--Find all employees that are in the "Sales" department. Use "SoftUni" database.
+SELECT EmployeeID, FirstName, LastName, d.Name AS DepartmentName
+FROM Employees AS e
+JOIN Departments as d ON e.DepartmentID = d.DepartmentID
+WHERE d.Name = 'Sales'
+
+--SAME RESULT BUT ANOTHER SOLUTION - MUST BE MORE OPTIMIZE !!!
+SELECT EmployeeID, FirstName, LastName, d.Name AS DepartmentName
+FROM Employees AS e
+JOIN Departments as d ON e.DepartmentID = d.DepartmentID AND d.[Name] = 'Sales'
+
+--Show all employees that: 
+-----Are hired after 1/1/1999
+-----Are either in "Sales" or "Finance" department
+--Sorted by HireDate (ascending).
+SELECT e.FirstName, e.LastName, e.HireDate, d.Name AS DeptName
+FROM Employees AS e
+JOIN Departments as d ON e.DepartmentID = d.DepartmentID 
+	AND (d.[Name] = 'Sales' OR d.[Name] = 'Finance')
+WHERE e.HireDate > '1/1/1999'
+ORDER BY e.HireDate
+
+
+--Display information about employee's manager and employee's department .
+--Show only the first 50 employees.
+--Sort by EmployeeID (ascending).
+
+SELECT TOP 50 e.EmployeeID
+	,(e.FirstName + ' ' + e.LastName) AS 'EmployeeName'
+	, (me.FirstName + ' ' + me.LastName) AS 'ManagerName'
+	, d.Name AS 'DepartmentName'
+FROM Employees AS e
+JOIN Departments AS d ON e.DepartmentID = d.DepartmentID
+JOIN Employees AS me ON me.EmployeeID = e.ManagerID
+ORDER BY e.EmployeeID
+
+--second solution
+SELECT TOP 50
+e.EmployeeID,
+e.FirstName + ' ' + e.LastName AS EmployeeName, --cross table selection
+m.FirstName + ' ' + m. LastName AS ManagerName, --cross table selection
+d.Name AS DepartmentName
+FROM Employees AS e
+LEFT JOIN Employees AS m ON m.EmployeeID = e.ManagerID --self join
+LEFT JOIN Departments AS d ON d.DepartmentID = e.DepartmentID
+ORDER BY e.EmployeeID ASC
+
+--third solution
+SELECT TOP 50 e.EmployeeID
+	,CONCAT(e.FirstName, ' ', e.LastName) AS 'EmployeeName'
+	,CONCAT(me.FirstName, ' ', me.LastName) AS 'ManagerName'
+	,d.Name AS 'DepartmentName'
+FROM Employees AS e
+JOIN Departments AS d ON e.DepartmentID = d.DepartmentID
+LEFT JOIN Employees AS me ON e.ManagerID = me.EmployeeID
+ORDER BY e.EmployeeID
+
+--Subquery
+
+SELECT *
+FROM Employees AS e
+WHERE e.DepartmentID IN
+	(
+		SELECT d.DepartmentID
+		FROM Departments AS d
+		WHERE d.Name = 'Finance'
+)
+
+--Display lowest average salary of all departments.
+	--Calculate average salary for each department.
+	--Then show the value of smallest one.
+
+SELECT MIN(a.AverageSalary) AS MinAverageSalary
+FROM
+(
+	SELECT e.DepartmentID
+	,AVG(e.Salary) AS AverageSalary
+	FROM Employees AS e
+	GROUP BY e.DepartmentID	
+) AS A
+--SECOND
+SELECT TOP 1 AVG(e.Salary) AS AverageSalary
+	FROM Employees AS e
+	GROUP BY e.DepartmentID
+	ORDER BY AverageSalary
