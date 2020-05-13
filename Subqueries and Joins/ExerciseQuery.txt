@@ -107,15 +107,120 @@ ORDER BY p.Elevation DESC
 
 --Problem 13.	Count Mountain Ranges
 SELECT c.CountryCode
-	,COUNT(m.ID) AS [MountainRange]
+	,COUNT(mc.CountryCode) AS [MountainRange]
 	--,m.MountainRange
 FROM Countries AS c
-	JOIN MountainsCountries AS mc ON c.CountryCode = mc.CountryCode
-	JOIN Mountains AS m ON mc.MountainId = m.Id
+	JOIN MountainsCountries AS mc ON c.CountryCode = mc.CountryCode	
 WHERE c.CountryCode IN ('BG', 'RU', 'US')
 GROUP BY c.CountryCode
 
 --Problem 14.	Countries with Rivers
+SELECT TOP 5 c.CountryName
+	, r.RiverName
+FROM Countries AS c
+	lEFT JOIN CountriesRivers AS cr ON c.CountryCode = cr.CountryCode
+	LEFT JOIN Rivers AS r ON r.Id = cr.RiverId
+WHERE c.ContinentCode = 'AF'
+ORDER BY c.CountryName
+
+--Problem 15.	*Continents and Currencies
+
+SELECT MostUsedCurrency.ContinentCode,
+       MostUsedCurrency.CurrencyCode,
+       MostUsedCurrency.CurrencyUsage
+FROM
+(SELECT c.ContinentCode
+	, c.CurrencyCode
+	, COUNT(c.CurrencyCode) AS CurrencyUsage
+	, DENSE_RANK() OVER 
+	(PARTITION BY c.ContinentCode ORDER BY COUNT(c.CurrencyCode) DESC) AS [Rank]
+	FROM Countries AS c
+GROUP BY c.ContinentCode, c.CurrencyCode
+HAVING COUNT(c.CurrencyCode) > 1
+) AS MostUsedCurrency
+WHERE MostUsedCurrency.[Rank] = 1
+ORDER BY MostUsedCurrency.ContinentCode; 
+
+--Problem 16.	Countries without any Mountains
+SELECT COUNT(c.CountryCode) AS Count
+FROM Countries AS c
+LEFT JOIN MountainsCountries AS mc ON c.CountryCode = mc.CountryCode
+WHERE mc.MountainId IS NULL
+GROUP BY mc.MountainId
+
+--Problem 17.	Highest Peak and Longest River by Country
+SELECT TOP 5 
+	b.CountryName, 
+	maxp as HighestPeakElevation, 
+	maxr as LongestRiverLength
+	FROM
+		(
+		SELECT c1.CountryName 
+			,MAX(r.Length) AS maxr
+			FROM Rivers AS r
+			JOIN CountriesRivers AS cr ON cr.RiverId = r.Id
+			JOIN Countries AS c1 ON cr.CountryCode = c1.CountryCode
+		GROUP BY c1.CountryName
+		) AS a
+	JOIN
+		(
+		SELECT c2.CountryName
+			,MAX(p.Elevation) AS maxp
+			FROM Peaks AS p
+			JOIN MountainsCountries AS m ON p.MountainId = m.MountainId
+			JOIN Countries AS c2 ON M.CountryCode = c2.CountryCode
+		GROUP BY c2.CountryName
+		) AS b
+		ON a.CountryName = b.CountryName
+ORDER BY maxp DESC, maxr DESC, b.CountryName
+
+--second solution
+SELECT c.CountryName
+	, MAX(p.Elevation) AS HighestPeakElevation
+	, MAX(r.Length) AS LongestRiverLength
+	FROM Countries AS c
+	LEFT JOIN MountainsCountries AS mc ON c.CountryCode = mc.CountryCode
+	LEFT JOIN Mountains AS m ON m.Id = mc.MountainId
+	LEFT JOIN Peaks AS p ON p.MountainId = m.Id
+	LEFT JOIN CountriesRivers AS cr ON cr.CountryCode = c.CountryCode
+	LEFT JOIN Rivers AS r ON r.Id = cr.RiverId
+GROUP BY c.CountryName
+ORDER BY HighestPeakElevation DESC, LongestRiverLength DESC, c.CountryName
+
+--THIRD SOLUTION RAstardzhiev
+SELECT  peaks.CountryName,
+               peaks.Elevation AS HighestPeakElevation,
+               rivers.Length AS LongestRiverLength
+FROM
+(
+    SELECT c.CountryName,
+           c.CountryCode,
+           DENSE_RANK() OVER(PARTITION BY c.CountryName ORDER BY p.Elevation DESC) AS DescendingElevationRank,
+           p.Elevation
+    FROM Countries AS c
+         FULL OUTER JOIN MountainsCountries AS mc ON c.CountryCode = mc.CountryCode
+         FULL OUTER JOIN Mountains AS m ON mc.MountainId = m.Id
+         FULL OUTER JOIN Peaks AS p ON m.Id = p.MountainId
+) AS peaks
+FULL OUTER JOIN
+(
+    SELECT c.CountryName,
+           c.CountryCode,
+           DENSE_RANK() OVER(PARTITION BY c.CountryCode ORDER BY r.Length DESC) AS DescendingRiversLenghRank,
+           r.Length
+    FROM Countries AS c
+         FULL OUTER JOIN CountriesRivers AS cr ON c.CountryCode = cr.CountryCode
+         FULL OUTER JOIN Rivers AS r ON cr.RiverId = r.Id
+) AS rivers ON peaks.CountryCode = rivers.CountryCode
+WHERE peaks.DescendingElevationRank = 1
+      AND rivers.DescendingRiversLenghRank = 1
+      AND (peaks.Elevation IS NOT NULL
+           OR rivers.Length IS NOT NULL)
+ORDER BY HighestPeakElevation DESC,
+         LongestRiverLength DESC,
+         CountryName; 	
+
+
 
 
 
