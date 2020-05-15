@@ -1,0 +1,52 @@
+CREATE FUNCTION udf_ProjectDurationWeeks(@StartDate DATETIME, @EndDate DATETIME)
+RETURNS INT
+AS 
+BEGIN
+	DECLARE @projectDuration INT
+	IF(@EndDate IS NULL)
+	BEGIN
+		SET @EndDate = GETDATE()
+	END
+
+	SET @projectDuration = DATEDIFF(WEEK, @StartDate, @EndDate)
+	RETURN @projectDuration
+END
+
+SELECT 
+	[Name], dbo.udf_ProjectDurationWeeks(StartDate, EndDate) AS Duration
+FROM Projects
+
+-----
+
+CREATE FUNCTION udf_AverageSalaryByDepartment()
+RETURNS TABLE 
+AS 
+RETURN
+(
+	SELECT d.[Name], AVG(e.Salary) AS AverageSalary
+	FROM Departments AS d
+	JOIN Employees AS e ON d.DepartmentID = e.DepartmentID
+	GROUP BY d.DepartmentID, d.[Name]
+)
+
+SELECT * FROM dbo.udf_AverageSalaryByDepartment()
+
+---
+CREATE FUNCTION udf_EmployeeListByDepartment(@DepName nvarchar(20))
+RETURNS @result TABLE(
+	FirstName nvarchar(50) NOT NULL,
+	LastName nvarchar(50) NOT NULL,
+	JobTitle nvarchar(50) NOT NULL) AS
+BEGIN
+	WITH Employees_CTE (FirstName, LastName, DepartmentName)
+	AS (
+		SELECT e.FirstName, e.LastNaME, d.[Name]
+		FROM Employees AS e
+		LEFT JOIN Departments AS d ON d.DepartmentID = e.DepartmentID)
+
+	INSERT INTO @result SELECT FirstName, LastName, DepartmentName
+		FROM Employees_CTE WHERE DepartmentName = @DepName
+	RETURN
+END
+
+SELECT * FROM dbo.udf_EmployeeListByDepartment('Production')
