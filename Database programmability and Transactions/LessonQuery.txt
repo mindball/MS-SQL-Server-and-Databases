@@ -16,7 +16,7 @@ SELECT
 	[Name], dbo.udf_ProjectDurationWeeks(StartDate, EndDate) AS Duration
 FROM Projects
 
------
+-----------------------------------------------------------------------------
 
 CREATE FUNCTION udf_AverageSalaryByDepartment()
 RETURNS TABLE 
@@ -31,7 +31,8 @@ RETURN
 
 SELECT * FROM dbo.udf_AverageSalaryByDepartment()
 
----
+-----------------------------------------------------------------------------
+
 CREATE FUNCTION udf_EmployeeListByDepartment(@DepName nvarchar(20))
 RETURNS @result TABLE(
 	FirstName nvarchar(50) NOT NULL,
@@ -50,3 +51,101 @@ BEGIN
 END
 
 SELECT * FROM dbo.udf_EmployeeListByDepartment('Production')
+
+-----------------------------------------------------------------------------
+
+CREATE FUNCTION ufn_GetSalaryLevel(@salary INT)
+RETURNS NVARCHAR(10)
+AS
+BEGIN
+	DECLARE @salaryLevel VARCHAR(10)
+	IF (@salary < 30000)
+		SET @salaryLevel = 'Low'
+	ELSE IF(@salary >= 30000 AND @salary <= 50000)
+		SET @salaryLevel = 'Average'
+	ELSE
+		SET @salaryLevel = 'High'
+	RETURN @salaryLevel
+End
+
+SELECT FirstName, LastName, Salary,
+dbo.udf_GetSalaryLevel(Salary) as SalaryLevel
+FROM Employees
+
+Procedure--------------------------------------------------------------------
+CREATE PROCEDURE usp_GetSeniorEmployees
+AS
+SELECT * 
+	FROM Employees
+	WHERE DATEDIFF(YEAR, HireDate, GETDATE()) > 18
+
+EXEC dbo.usp_GetSeniorEmployees
+
+-----------------------------------------------------------------------------
+
+CREATE OR ALTER PROCEDURE usp_GetSeniorEmployees
+AS
+SELECT 
+	FirstName
+	,LastName
+	,DATEDIFF(YEAR, HireDate, GETDATE()) AS SummaryYears
+	FROM Employees
+	WHERE DATEDIFF(YEAR, HireDate, GETDATE()) > 18
+	ORDER BY SummaryYears
+
+EXEC dbo.usp_GetSeniorEmployees
+
+--You could check if any objects depend on the stored procedure
+--by executing the system stored procedure sp_depends
+EXEC sp_depends 'usp_GetSeniorEmployees'
+
+---------Stored Procedures Using Parameters----------------------------------
+
+CREATE OR ALTER PROCEDURE usp_GetSeniorEmployees @SummaryYears INT = 19 --default value
+AS
+SELECT 
+	FirstName
+	,LastName
+	,DATEDIFF(YEAR, HireDate, GETDATE()) AS SummaryYears
+	FROM Employees
+	WHERE DATEDIFF(YEAR, HireDate, GETDATE()) > @SummaryYears
+	ORDER BY SummaryYears
+
+EXEC dbo.usp_GetSeniorEmployees  --with default value
+
+EXEC dbo.usp_GetSeniorEmployees 20
+
+-------------------Returning Multiple Results--------------------------------
+
+CREATE OR ALTER PROCEDURE usp_GetSeniorEmployees @SummaryYears INT = 19 --default value
+	,@SecretText nvarchar(max)
+AS
+SELECT 
+	FirstName
+	,LastName
+	,DATEDIFF(YEAR, HireDate, GETDATE()) AS SummaryYears
+	FROM Employees
+	WHERE DATEDIFF(YEAR, HireDate, GETDATE()) > @SummaryYears
+	ORDER BY SummaryYears
+
+	SELECT @SecretText AS SecretText
+
+EXEC dbo.usp_GetSeniorEmployees 
+	@SummaryYears = 19
+	,@SecretText = 'test'
+
+
+---------------------Returning Values Using OUTPUT Parameters-------------------------
+
+CREATE PROCEDURE dbo.usp_AddNumbers
+	@firstNumber SMALLINT
+	,@secondNumber SMALLINT
+	,@result INT OUTPUT
+AS
+	SET @result = @firstNumber + @secondNumber
+
+DECLARE @answer smallintQ
+
+EXECUTE usp_AddNumbers 5, 6, @answer OUTPUT
+
+SELECT 'The result is: ', @answer
