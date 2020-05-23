@@ -1,0 +1,63 @@
+USE BANK --DATEBASE
+
+CREATE PROCEDURE usp_SendMoney @senderAccountId INT, @receiverAccountId INT, @amount DECIMAL(15, 2)
+AS
+BEGIN TRANSACTION
+
+DECLARE @senderAccount INT = (
+	SELECT ah.Id
+	FROM  AccountHolders AS ah
+	JOIN Accounts AS a ON ah.Id = a.AccountHolderId
+	WHERE a.AccountHolderId = @senderAccountId
+	GROUP BY ah.Id
+	)
+
+DECLARE @receiveAccount INT = (
+	SELECT ah.Id
+	FROM  AccountHolders AS ah
+	JOIN Accounts AS a ON ah.Id = a.AccountHolderId
+	WHERE a.AccountHolderId = @receiverAccountId
+	GROUP BY ah.Id
+	)
+
+IF(@senderAccount IS NULL OR @receiveAccount IS NULL)
+BEGIN
+	ROLLBACK
+	RAISERROR('Account doesn''t exitst!', 16, 1)
+	RETURN
+END
+
+DECLARE @currentAmount DECIMAL(15, 2) = (	
+	SELECT SUM(Balance)
+	FROM  Accounts AS a
+	JOIN AccountHolders AS ah ON ah.Id = a.AccountHolderId
+	WHERE a.AccountHolderId = @senderAccount
+	)
+
+IF(@currentAmount - @amount < 0)
+BEGIN
+	ROLLBACK
+	RAISERROR('Insufficient funds!', 16, 2)
+	RETURN
+END
+
+UPDATE Accounts
+SET Balance -= @amount
+WHERE @senderAccount = AccountHolderId
+
+UPDATE Accounts
+SET Balance += @amount
+WHERE @receiveAccount = AccountHolderId
+
+COMMIT 
+
+SELECT *
+FROM Accounts
+ORDER BY AccountHolderId
+
+EXEC usp_SendMoney 1, 2, 300 --error raise Insufficient funds!
+
+EXEC usp_SendMoney 13, 2, 300 --error Account doesn't exitst!
+
+EXEC usp_SendMoney 2, 1, 300 --success
+
