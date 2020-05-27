@@ -152,3 +152,57 @@ SELECT * FROM Accounts WHERE Id = 1 OR Id = 2
 EXEC usp_TransferMoney 1, 2, 100
 SELECT * FROM Accounts WHERE Id = 1 OR Id = 2
 
+---------------------------19.  Trigger
+
+CREATE TRIGGER tr_InsertItemBySpecifiedLevel ON UserGameItems INSTEAD OF INSERT
+AS
+DECLARE @itemId INT = (SELECT ItemId FROM inserted)
+DECLARE @userGameId INT = (SELECT UserGameId FROM inserted)
+
+DECLARE @itemLevel INT = (SELECT MinLevel FROM Items WHERE Id = @itemId)
+DECLARE @userGameLevel INT = (SELECT Level FROM UsersGames WHERE Id = @userGameId)
+
+if(@userGameLevel >= @itemLevel)
+BEGIN
+	INSERT INTO UserGameItems (ItemId, UserGameId) VALUES
+	(@itemId, @userGameId)
+END
+
+INSERT INTO UserGameItems (ItemId, UserGameId) VALUES
+(14, 38)
+
+SELECT * FROM UserGameItems WHERE ItemId = 14
+
+CREATE PROC usp_BuyItem @userId INT, @itemId INT, @gameId INT
+AS
+BEGIN TRANSACTION
+DECLARE @user INT = (SELECT Id FROM Users WHERE @userId = Id)
+DECLARE @item INT = (SELECT Id FROM Items WHERE @itemId = Id)
+DECLARE @game INT = (SELECT Id From UsersGames WHERE @gameId = GameId)
+
+IF(@user IS NULL OR @item IS NULL OR @game IS NULL)
+BEGIN 
+	ROLLBACK
+	RAISERROR('INVALID ARGUMENTS user, item OR game', 16, 1)
+	RETURN
+END
+
+DECLARE @userCash DECIMAL(15, 2) = (SELECT Cash FROM UsersGameS WHERE @user = UserId AND GameId = @game)
+DECLARE @itemPrice DECIMAL(15, 2) = (SELECT Price FROM Items WHERE Id = @item)
+
+IF(@userCash - @itemPrice > 0)
+BEGIN
+	ROLLBACK
+	RAISERROR('Insufficient funds', 16, 1)
+	RETURN
+END
+
+UPDATE UsersGames
+SET CASH -= @itemPrice
+Where UserId = @user AND @game = GameId
+
+INSERT UserGameItems (ItemId, UserGameId) VALUES
+(@item, @game)
+
+COMMIT
+
