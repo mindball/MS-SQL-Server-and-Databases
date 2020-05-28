@@ -1,0 +1,47 @@
+-----------------Problem 1.	Number of Users for Email Provider
+
+SELECT RIGHT(u.Email, LEN(u.Email) - CHARINDEX('@', u.Email)) AS 'Email Provider'
+,COUNT(Id)  'Number Of Users'
+FROM   Users AS u
+GROUP BY (RIGHT(u.Email, LEN(u.Email) - CHARINDEX('@', u.Email)))
+ORDER BY 'Number Of Users' DESC, 'Email Provider' ASC
+
+-----------------Problem 2.	All User in Games
+--Find all user in games with information about them. Display the game name, 
+--game type, username, level, cash and character name. Sort the result by level
+--in descending order, then by username and game in alphabetical order. Submit 
+--your query statement as Prepare DB & run queries in Judge.
+
+SELECT g.Name
+	,gt.Name
+	,u.Username	
+	,ug.Level
+	,ug.Cash
+	,c.Name
+FROM Games AS g
+JOIN GameTypes AS gt ON gt.Id = g.GameTypeId
+JOIN UsersGames AS ug ON ug.GameId = g.Id
+JOIN Users AS u ON u.Id = ug.UserId
+JOIN Characters AS c ON c.Id = ug.CharacterId
+ORDER BY ug.Level DESC, u.Username ASC, g.Name ASC
+
+-----------------Problem 3.	Users in Games with Their Items
+--Find all users in games with their items count and items price.
+--Display the username, game name, items count and items price. 
+--Display only user in games with items count more or equal to 10. 
+--Sort the results by items count in descending order then by price in 
+--descending order and by username in ascending order. Submit your query 
+--statement as Prepare DB & run queries in Judge.
+
+SELECT u.Username
+	, g.Name AS Game
+	, COUNT(i.Id) AS 'Items Count'
+	, SUM(i.Price) AS 'Items Price'
+	FROM Users AS u
+JOIN UsersGames AS ug ON u.Id = ug.UserId
+JOIN Games AS g ON g.Id = ug.GameId
+JOIN UserGameItems AS ugi ON ugi.UserGameId = ug.Id
+JOIN Items AS i ON i.Id = ugi.ItemId
+GROUP BY u.Username, g.Name
+HAVING COUNT(i.Id) >= 10
+ORDER BY 'Items Count' DESC, 'Items Price' DESC, u.Username ASC
