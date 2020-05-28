@@ -206,3 +206,76 @@ INSERT UserGameItems (ItemId, UserGameId) VALUES
 
 COMMIT
 
+SELECT u.Username, g.Name, ug.Cash, i.Name
+FROM Users AS u
+JOIN UsersGames AS ug ON u.Id = ug.UserId
+JOIN Games AS g ON ug.GameId = g.Id
+JOIN UserGameItems AS ugt ON ug.Id = ugt.UserGameId
+JOIN Items AS i ON ugt.ItemId = i.ItemTypeId
+JOIN ItemTypes AS it ON it.Id = i.ItemTypeId
+WHERE g.Name = 'Bali'
+ORDER BY u.Username, i.Name
+
+---------------------------Problem 21. Employees with Three Projects
+CREATE PROC usp_AssignProject @emloyeeId INT, @projectID INT
+AS
+BEGIN TRANSACTION
+DECLARE @employee INT = (SELECT EmployeeID FROM Employees WHERE EmployeeID = @emloyeeId)
+
+IF(@employee IS NULL)
+BEGIN
+	ROLLBACK
+	RAISERROR('Invalid Employee ID', 16, 3)
+END
+
+DECLARE @project INT = (SELECT ProjectID FROM Projects WHERE ProjectID = @projectID)
+
+IF(@employee IS NULL)
+BEGIN
+	ROLLBACK
+	RAISERROR('Invalid Projects ID', 16, 2)
+END
+
+DECLARE @projectCount INT = 
+(
+	Select Count(ProjectID) 
+	FROM EmployeesProjects AS ep 	
+	WHERE @emloyeeId = ep.EmployeeID 
+)
+
+IF(@projectCount >= 3)
+BEGIN
+	ROLLBACK
+	RAISERROR('The employee has too many projects!', 16, 1)
+END
+
+INSERT INTO EmployeesProjects(EmployeeID, ProjectID) VALUES
+(@emloyeeId, @projectID)
+COMMIT
+
+
+SELECT * FROM EmployeesProjects ORDER BY EmployeeID
+
+
+---------------------------Problem 22. Delete Employees
+
+CREATE TABLE Deleted_Employees
+(
+	EmployeeId INT PRIMARY KEY IDENTITY
+	, FirstName VARCHAR(30)
+	, LastName VARCHAR(30)
+	, MiddleName VARCHAR(30)
+	, JobTitle VARCHAR(30)
+	,DepartmentId INT
+	, Salary DECIMAL(15, 2)
+)
+
+CREATE TRIGGER tr_addDeletedEmployees ON EmpLoyees FOR DELETE
+AS
+INSERT INTO Deleted_Employees(FirstName, LastName, MiddleName, JobTitle, DepartmentId, Salary)
+SELECT FirstName, LastName, MiddleName, JobTitle, DepartmentId, Salary FROM deleted
+
+
+
+
+
