@@ -45,3 +45,46 @@ JOIN Items AS i ON i.Id = ugi.ItemId
 GROUP BY u.Username, g.Name
 HAVING COUNT(i.Id) >= 10
 ORDER BY 'Items Count' DESC, 'Items Price' DESC, u.Username ASC
+
+
+-----------------Problem 4.	* User in Games with Their Statistics
+
+select 
+	u.UserName, 
+	g.name as game, 
+	MAX(c.name) as ch,
+	SUM(its.strength) + MAX(gts.strength) + MAX(cs.strength) as strength,
+	SUM(its.defence) + MAX(gts.defence) + MAX(cs.defence) as defence,
+	SUM(its.speed) + MAX(gts.speed) + MAX(cs.speed) as speed,
+	SUM(its.mind) + MAX(gts.mind) + MAX(cs.mind) as mind,
+	SUM(its.luck) + MAX(gts.luck) + MAX(cs.luck) as luck
+from Users u
+join UsersGames ug on ug.UserId = u.id
+join Games g on ug.Gameid = g.id
+join Gametypes gt on gt.id = g.GameTypeId
+join [Statistics] gts on gts.id = gt.BonusStatsId
+join Characters c on ug.CharacterId = c.id
+join [Statistics] cs on cs.id = c.StatisticId
+join UserGameItems ugi on ugi.UserGameId = ug.Id
+join items i on i.id = ugi.ItemId
+join [Statistics] its on its.Id = i.StatisticId
+group by u.UserName, g.name
+order by strength desc, defence desc, speed desc, mind desc, luck des
+
+-----------------Problem 5.	All Items with Greater than Average Statistics
+
+SELECT i.Name, i.Price, i.MinLevel, s.Strength, s.Defence, s.Speed, s.Luck, s.Mind
+FROM Items AS i
+JOIN [Statistics] AS s ON s.Id = i.StatisticId
+WHERE s.Mind > (SELECT AVG(Mind) FROM [Statistics]) AND 
+	s.Luck > (SELECT AVG(Luck) FROM [Statistics]) AND
+	s.Speed > (SELECT AVG(Speed) FROM [Statistics])
+ORDER BY i.Name
+
+-----------------Problem 6.	Display All Items with Information about Forbidden Game Type
+
+SELECT i.Name AS Item, i.Price, i.MinLevel, gt.Name AS [Forbidden Game Type]
+FROM Items AS i
+left JOIN GameTypeForbiddenItems AS gtfi ON gtfi.ItemId = i.Id
+left JOIN GameTypes AS gt ON gt.Id = gtfi.GameTypeId
+ORDER BY gt.Name DESC, i.Name ASC
