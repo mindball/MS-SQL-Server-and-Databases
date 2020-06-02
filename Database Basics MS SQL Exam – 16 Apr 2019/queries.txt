@@ -1,0 +1,44 @@
+-- 1.	Database Design Section 1. DDL 
+CREATE TABLE Planes(
+	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	[Name] varchar(30) NOT NULL,
+	Seats int NOT NULL,
+	[Range] int NOT NULL
+	);
+
+CREATE TABLE Flights(
+	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	DepartureTime datetime2 NULL,
+	ArrivalTime datetime2 NULL,
+	Origin varchar(50) NOT NULL,
+	Destination varchar(50) NOT NULL,
+	PlaneId int NOT NULL FOREIGN KEY REFERENCES Planes(Id) 
+	);
+
+CREATE TABLE Passengers(
+	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	FirstName varchar(30) NOT NULL,
+	LastName varchar(30) NOT NULL,
+	Age int NOT NULL,
+	[Address] varchar(30) NOT NULL,
+	PassportId varchar(11) CONSTRAINT lencheck CHECK (LEN([PassportId]) = 11) NOT NULL
+	);
+
+CREATE TABLE LuggageTypes(
+	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	[Type] varchar(30) NOT NULL
+);
+
+CREATE TABLE Luggages(
+	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	LuggageTypeId int NOT NULL FOREIGN KEY REFERENCES LuggageTypes(Id),
+	PassengerId int NOT NULL FOREIGN KEY REFERENCES Passengers(Id) 
+	);
+
+CREATE TABLE Tickets(
+	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	PassångerId int  NOT NULL FOREIGN KEY REFERENCES Passengers(Id),
+	FlightId int NOT NULL FOREIGN KEY REFERENCES Flights(Id),
+	LuggageId int NOT NULL FOREIGN KEY REFERENCES Luggages(Id),
+	Price decimal(18, 2) NOT NULL
+	);
