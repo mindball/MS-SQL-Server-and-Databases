@@ -1,44 +1,100 @@
--- 1.	Database Design Section 1. DDL 
-CREATE TABLE Planes(
-	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name] varchar(30) NOT NULL,
-	Seats int NOT NULL,
-	[Range] int NOT NULL
-	);
-
-CREATE TABLE Flights(
-	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	DepartureTime datetime2 NULL,
-	ArrivalTime datetime2 NULL,
-	Origin varchar(50) NOT NULL,
-	Destination varchar(50) NOT NULL,
-	PlaneId int NOT NULL FOREIGN KEY REFERENCES Planes(Id) 
-	);
-
-CREATE TABLE Passengers(
-	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	FirstName varchar(30) NOT NULL,
-	LastName varchar(30) NOT NULL,
-	Age int NOT NULL,
-	[Address] varchar(30) NOT NULL,
-	PassportId varchar(11) CONSTRAINT lencheck CHECK (LEN([PassportId]) = 11) NOT NULL
-	);
-
-CREATE TABLE LuggageTypes(
-	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Type] varchar(30) NOT NULL
+-----------------------------1.	Database Design Section 1. DDL 
+CREATE TABLE Planes
+(Id      INT
+ PRIMARY KEY IDENTITY, 
+ [Name]  VARCHAR(30) NOT NULL, 
+ Seats   INT NOT NULL, 
+ [Range] INT NOT NULL
 );
 
-CREATE TABLE Luggages(
-	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	LuggageTypeId int NOT NULL FOREIGN KEY REFERENCES LuggageTypes(Id),
-	PassengerId int NOT NULL FOREIGN KEY REFERENCES Passengers(Id) 
-	);
+CREATE TABLE Flights
+(Id            INT
+ PRIMARY KEY IDENTITY, 
+ DepartureTime DATETIME2, 
+ ArrivalTime   DATETIME2, 
+ [Origin]      VARCHAR(50) NOT NULL, 
+ [Destination] VARCHAR(50) NOT NULL, 
+ PlaneId       INT NOT NULL
+                   FOREIGN KEY REFERENCES Planes(Id)
+);
 
-CREATE TABLE Tickets(
-	Id int PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	PassångerId int  NOT NULL FOREIGN KEY REFERENCES Passengers(Id),
-	FlightId int NOT NULL FOREIGN KEY REFERENCES Flights(Id),
-	LuggageId int NOT NULL FOREIGN KEY REFERENCES Luggages(Id),
-	Price decimal(18, 2) NOT NULL
-	);
+CREATE TABLE Passengers
+(Id         INT
+ PRIMARY KEY IDENTITY, 
+ FirstName  VARCHAR(30) NOT NULL, 
+ LastName   VARCHAR(30) NOT NULL, 
+ Age        INT NOT NULL, 
+ Address    VARCHAR(30) NOT NULL, 
+ PassportId CHAR(11) NOT NULL
+);
+
+CREATE TABLE LuggageTypes
+(Id     INT
+ PRIMARY KEY IDENTITY, 
+ [Type] VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE Luggages
+(Id            INT
+ PRIMARY KEY IDENTITY, 
+ LuggageTypeId INT NOT NULL
+                   FOREIGN KEY REFERENCES LuggageTypes(Id), 
+ PassengerId   INT NOT NULL
+                   FOREIGN KEY REFERENCES Passengers(Id),
+);
+
+CREATE TABLE Tickets
+(Id            INT
+ PRIMARY KEY IDENTITY, 
+ PassengerId   INT NOT NULL
+                   FOREIGN KEY REFERENCES Passengers(Id), 
+ FlightId      INT NOT NULL
+                   FOREIGN KEY REFERENCES Flights(Id), 
+ LuggageId INT NOT NULL
+                   FOREIGN KEY REFERENCES Luggages(Id), 
+ Price         DECIMAL(18, 2) NOT NULL
+);
+
+-----------------------------2.	Insert
+INSERT INTO Planes ([Name], Seats, [Range]) VALUES
+	('Airbus 336', 112, 5132),
+	('Airbus 330', 432, 5325),
+	('Boeing 369', 231, 2355),
+	('Stelt 297', 254, 2143),
+	('Boeing 338', 165, 5111),
+	('Airbus 558', 387, 1342),
+	('Boeing 128', 345, 5541)
+
+INSERT INTO LuggageTypes ([Type]) Values
+	('Crossbody Bag'),
+	('School Backpack'),
+	('Shoulder Bag')
+
+
+-----------------------------3.	Update
+--Make all flights to "Carlsbad" 13% more expensive
+
+UPDATE Tickets
+SET Price *= 1.13
+FROM  Tickets AS t
+	JOIN Flights AS f ON t.FlightId = f.Id
+WHERE f.Destination = 'Carlsbad'
+
+UPDATE dbo.Tickets
+  SET 
+      dbo.Tickets.Price*=1.13
+WHERE dbo.Tickets.FlightId IN
+(
+    SELECT f.Id
+    FROM dbo.Flights f
+    WHERE f.Destination = 'Carlsbad'
+);
+
+
+-----------------------------4.	Delete
+--Delete all flights to " Ayn Halagim ".
+
+DECLARE @flightId int = (SELECT f.Id FROM dbo.Flights f WHERE f.Destination = 'Ayn Halagim')
+
+DELETE FROM dbo.Tickets
+WHERE dbo.Tickets.FlightId = @flightId
