@@ -98,3 +98,37 @@ DECLARE @flightId int = (SELECT f.Id FROM dbo.Flights f WHERE f.Destination = 'A
 
 DELETE FROM dbo.Tickets
 WHERE dbo.Tickets.FlightId = @flightId
+
+-----------------------------5.	The "Tr" Planes
+--Select all of the planes, which name contains "tr". 
+--Order them by id (ascending), name (ascending), seats (ascending) and range (ascending).
+
+SELECT *
+FROM Planes
+WHERE Name LIKE '%tr%'
+ORDER BY Id, [Name], Seats, Range
+
+-----------------------------6.	Flight Profits
+--Select the total profit for each flight from database. Order them by total price 
+--(descending), flight id (ascending).
+
+SELECT f.Id, Sum(t.Price)
+FROM Flights AS f
+JOIN Tickets AS t ON f.Id = t.FlightId
+GROUP BY f.Id
+ORDER BY Sum(t.Price) DESC, f.Id ASC
+
+-----------------------------7.	Passenger Trips
+--Select the full name of the passengers with their trips (origin - destination).
+--Order them by full name (ascending), origin (ascending) and destination (ascending).
+
+SELECT CONCAT(p.FirstName, ' ', p.LastName) AS [Full Name], f.Origin, f.Destination
+FROM Passengers AS p
+JOIN Tickets AS t ON t.PassengerId = p.Id
+JOIN Flights AS f ON t.FlightId = f.Id
+ORDER BY [Full Name] ASC, f.Origin, f.Destination
+
+
+
+
+
