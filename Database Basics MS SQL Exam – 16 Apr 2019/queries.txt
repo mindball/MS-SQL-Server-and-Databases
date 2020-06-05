@@ -128,6 +128,102 @@ JOIN Tickets AS t ON t.PassengerId = p.Id
 JOIN Flights AS f ON t.FlightId = f.Id
 ORDER BY [Full Name] ASC, f.Origin, f.Destination
 
+-----------------------------8.	Non Adventures People
+--Select all people who don't have tickets. Select their first name, last name and age.
+--Order them by age (descending), first name (ascending) and last name (ascending).
+
+SELECT p.FirstName, p.LastName, p.Age
+FROM Passengers AS p
+LEFT JOIN Tickets AS t ON p.Id = t.PassengerId
+WHERE t.Id IS NULL
+ORDER BY p.Age DESC, p.FirstName ASC, p.LastName ASC
+
+-----------------------------9.	Full Info
+--Select all passengers who have trips. Select their full name 
+--(first name – last name), plane name, trip (in format {origin} - {destination})
+--and luggage type. Order the results by full name (ascending), name (ascending), 
+--origin (ascending), destination (ascending) and luggage type (ascending).
+
+SELECT CONCAT(p.FirstName, ' ', p.LastName) AS [Full Name]
+	,pl.Name AS [Plane Name]
+	,CONCAT(f.Origin, ' - ', f.Destination) AS [Trip]
+	,lt.Type AS [Luggage Type]
+FROM Passengers AS p
+	JOIN Tickets AS t ON p.Id = t.PassengerId	
+	JOIN Flights AS f ON t.FlightId = f.Id
+	JOIN Planes AS pl ON pl.Id = f.PlaneId
+	JOIN Luggages AS l ON t.LuggageId = l.Id
+	JOIN LuggageTypes AS lt ON lt.Id = l.LuggageTypeId
+ORDER BY [Full Name] ASC	
+	,[Plane Name] ASC
+	,f.Origin ASC
+	,f.Destination ASC
+	,[Luggage Type] ASC
+
+-----------------------------10.	PSP
+--Select all planes with their name, seats count and passengers count. 
+--Order the results by passengers count (descending), plane name (ascending) and seats (ascending) 
+
+SELECT pl.[Name], pl.Seats,COUNT(t.PassengerId) AS [Passengers Count]
+	FROM Planes AS pl
+		LEFT JOIN Flights AS f ON f.PlaneId = pl.Id
+		LEFT JOIN Tickets AS t ON t.FlightId = f.Id
+		LEFT JOIN Passengers AS p ON t.PassengerId = p.Id
+		GROUP BY pl.[Name], pl.Seats
+		ORDER BY COUNT(p.Id) DESC, pl.[Name] ASC, pl.Seats ASC
+
+
+-----------------------------Section 4. Programmability (20 pts)
+--11.	Vacation
+--Create a user defined function, named udf_CalculateTickets(@origin, @destination, @peopleCount)
+--that receives an origin (town name), destination (town name) and people count.
+--The function must return the total price in format "Total price {price}"
+--•	If people count is less or equal to zero return – "Invalid people count!"
+--•	If flight is invalid return – "Invalid flight!"
+
+CREATE FUNCTION udf_CalculateTickets(@origin VARCHAR(50)
+				, @destination VARCHAR(50), @peopleCount INT)
+RETURNS VARCHAR(30)
+AS 
+BEGIN
+	DECLARE @validOrigin VARCHAR(50) = 
+		(
+			SELECT Origin
+			FROM Flights
+			WHERE Origin = @origin
+		)
+	DECLARE @validDestination VARCHAR(50) = 
+		(
+			SELECT Destination
+			FROM Flights
+			WHERE Destination = @destination
+		)
+	IF(@validOrigin IS NULL OR @validDestination IS NULL)
+		BEGIN
+			RETURN 'Invalid flight!'
+		END
+	IF(@peopleCount <= 0 OR @peopleCount IS NULL)
+	BEGIN
+		RETURN 'Invalid people count!'
+	END
+
+	DECLARE @ticketPrice DECIMAL(18, 2)= 
+		(
+			SELECT t.Price
+			FROM Flights AS f
+			JOIN Tickets AS t ON t.FlightId = f.Id
+			WHERE f.Origin = @origin AND f.Destination = @destination
+		)
+	RETURN 'Total price ' + CAST((@ticketPrice *  @peopleCount) AS varchar)
+END
+
+SELECT dbo.udf_CalculateTickets('Kolyshley','Rancabolang', 33)
+
+SELECT dbo.udf_CalculateTickets('Kolyshley','Rancabolang', -1)
+
+SELECT dbo.udf_CalculateTickets('Invalid','Rancabolang', 33)
+
+	
 
 
 
