@@ -198,3 +198,32 @@ SELECT k.QUARTER, k.SubjectName, COUNT(k.StudentId) AS StudentsCount
 		) AS k	
 GROUP BY k.QUARTER, k.SubjectName
 ORDER BY k.QUARTER
+
+---------------------------------Section 4. Programmability (20 pts)
+---------------------18. Exam Grades
+--Create a user defined function, named udf_ExamGradesToUpdate(@studentId, @grade)
+--, that receives a student id and grade.
+
+CREATE FUNCTION udf_ExamGradesToUpdate(@studentId INT, @grade DECIMAL(15, 2))
+RETURNS VARCHAR(MAX)
+AS 
+BEGIN
+	DECLARE @currentStudent INT = (SELECT TOP 1 StudentId FROM StudentsExams WHERE @studentId = StudentId)
+	IF(@currentStudent IS NULL)
+	BEGIN
+		RETURN 'The student with provided id does not exist in the school!'
+	END	
+
+	IF(@grade > 6.00)
+	BEGIN
+		RETURN 'Grade cannot be above 6.00!'
+	END
+
+	DECLARE @firstName NVARCHAR(20) = (SELECT TOP(1) FirstName FROM Students WHERE @studentId = Id)
+	DECLARE @maxGrade DECIMAL(15,2) = @grade + 0.50;
+	DECLARE @count INT = (SELECT COUNT(Grade) 
+						FROM StudentsExams 						
+						WHERE StudentId = @studentId AND (Grade BETWEEN @grade AND @maxGrade))
+	RETURN ('You have to update ' + CAST(@count AS nvarchar(10)) + ' grades for the student ' + @firstName)
+END
+
